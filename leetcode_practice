@@ -14,3 +14,44 @@ where tt.amount is null group by customer_id;
 with name as
 (select name from customer where isnull(referee_id,'') <> '2'
 ) select * from name;
+
+-----------------------------*****************------------------------------------
+
+select product_id, year as first_year, quantity, price from 
+sales where (product_id, year) in (
+select product_id, min(year) from sales 
+group by  product_id );
+
+---------------------------******************-------------------------------------
+---------Write a solution to find all the classes that have at least five students.
+with class as (
+    select class from (select count(*) student_count,class from Courses 
+    group by class )t where student_count >'5'
+) select * from class ;
+
+--------------------------******************--------------------------------------
+------------------------Write a solution that will, for each user, return the number of followers.
+
+select user_id, count(follower_id) followers_count
+from followers f group by user_id;
+
+-------------------------******************-----------------------------------------
+-------------Write a solution to report the customer ids from the Customer table that bought all the products in the Product table.
+select customer_id from (select customer_id, count(product_key) pkc  from customer 
+group by customer_id)t 
+where pkc in (select count(distinct product_key) from product) 
+;
+
+--------------------------*****************------------------------------------------
+----------A single number is a number that appeared only once in the MyNumbers table.
+
+Find the largest single number. If there is no single number, report null.
+# Write your MySQL query statement below
+select max(num) num from (select * from Mynumbers
+group by num
+having count(num) = 1)t;
+
+# Write your MySQL query statement below
+select ifnull(max(num),null) num from (select * from Mynumbers
+group by num
+having count(num) = 1)t;
