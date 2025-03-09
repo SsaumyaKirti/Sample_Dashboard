@@ -1,0 +1,12 @@
+with product_id as (
+select product_id from Products where low_fats='Y' and
+recyclable='Y') select * from product_id;
+
+--------------------------------******************----------------------------------
+
+/* Write your T-SQL query statement below */
+select vv.customer_id, count(*) count_no_trans from Transactions tt 
+right join Visits vv on tt.visit_id=vv.visit_id
+where tt.amount is null group by customer_id;
+
+
