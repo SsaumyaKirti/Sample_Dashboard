@@ -9,4 +9,8 @@ select vv.customer_id, count(*) count_no_trans from Transactions tt
 right join Visits vv on tt.visit_id=vv.visit_id
 where tt.amount is null group by customer_id;
 
+------------------------------*****************------------------------------------
 
+with name as
+(select name from customer where isnull(referee_id,'') <> '2'
+) select * from name;
