@@ -55,3 +55,13 @@ having count(num) = 1)t;
 select ifnull(max(num),null) num from (select * from Mynumbers
 group by num
 having count(num) = 1)t;
+
+--------------------------*****************--------------------------------------------
+with employees_cal as (
+select reports_to,count(reports_to) reports_count,
+CEILING(SUM(age) / COALESCE(COUNT(reports_to), 1)) average_age 
+from employees
+group by reports_to) 
+
+select e.employee_id,e.name,reports_count,average_age from Employees e
+inner join employees_cal ecal on e.employee_id=ecal.reports_to;
