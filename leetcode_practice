@@ -76,3 +76,36 @@ LEAD(num) OVER (ORDER BY id) AS next_num
 FROM logs
 ) t
 WHERE num = prev_num AND num = next_num;
+
+-----------------------******************--------------------------------------
+
+WITH product_history AS (
+    SELECT 
+        product_id,
+        new_price,
+        change_date
+    FROM products
+    WHERE change_date <= '2019-08-16'
+),
+latest_prices AS (
+    SELECT 
+        product_id,
+        new_price,
+        change_date,
+        ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY change_date DESC) AS row_num
+    FROM product_history
+),
+all_products AS (
+    SELECT DISTINCT product_id
+    FROM products
+)
+SELECT 
+    p.product_id,
+    CASE 
+        WHEN lp.row_num = 1 THEN lp.new_price
+        ELSE 10
+    END AS price_on_2019_08_16
+FROM all_products p
+LEFT JOIN latest_prices lp
+ON p.product_id = lp.product_id AND lp.row_num = 1;
+
