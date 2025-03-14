@@ -115,3 +115,37 @@ select employee_id from employees where
 manager_id not in (select employee_id from employees)
  and salary<30000
  order by employee_id;
+
+--------------------------14/03/2025-----------------------
+
+WITH SeatsWithNeighbors AS (
+    SELECT 
+        CAST(id AS INT) AS seat_id,
+        CAST(student AS VARCHAR) AS student,
+        LEAD(id) OVER (ORDER BY id) AS next_seat_id,
+        LAG(id) OVER (ORDER BY id) AS previous_seat_id
+    FROM 
+        seat
+),
+SwappedSeats AS (
+    SELECT
+        CAST(seat_id AS INT) AS original_seat_id,
+        CASE
+            WHEN seat_id % 2 = 1 AND next_seat_id IS NOT NULL THEN next_seat_id
+            WHEN seat_id % 2 = 0 AND previous_seat_id IS NOT NULL THEN previous_seat_id
+            ELSE seat_id
+        END AS swapped_seat_id
+    FROM 
+        SeatsWithNeighbors
+)
+SELECT
+    CAST(S1.original_seat_id AS INT) AS id,
+    CAST(S2.student AS VARCHAR) AS student
+FROM 
+    SwappedSeats S1
+JOIN 
+    seat S2
+ON 
+    S1.swapped_seat_id = S2.id
+ORDER BY 
+    S1.original_seat_id;
