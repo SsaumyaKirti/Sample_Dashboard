@@ -149,3 +149,29 @@ ON
     S1.swapped_seat_id = S2.id
 ORDER BY 
     S1.original_seat_id;
+
+-------------------------***********modify***********-------------------------
+
+SELECT results
+FROM (
+    SELECT TOP 1 u.name AS results
+    FROM users u
+    JOIN (
+        SELECT TOP 5 user_id, COUNT(*) AS rating_count
+        FROM movierating
+        GROUP BY user_id
+        ORDER BY rating_count DESC
+    ) top_user
+    ON u.user_id = top_user.user_id
+    ORDER BY u.name ASC
+    UNION ALL
+    SELECT top 1 m.title AS results
+    FROM movies m
+    JOIN (select top 1 max(avg_rating) max_avg_rating,movie_id from(
+        SELECT movie_id, AVG(cast(rating as decimal(10,2))) AS avg_rating
+        FROM movierating
+        WHERE created_at >= '2020-02-01' AND created_at < '2020-03-01'
+        GROUP BY movie_id )t GROUP BY movie_id
+   ) subquery 
+   ON m.movie_id = subquery.movie_id
+) t;
