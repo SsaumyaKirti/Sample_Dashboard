@@ -175,3 +175,22 @@ FROM (
    ) subquery 
    ON m.movie_id = subquery.movie_id
 ) t;
+
+---------------------------**************************-------------------------
+
+WITH id_counts AS (
+    SELECT id, COUNT(*) AS count
+    FROM (
+        SELECT requester_id AS id
+        FROM requestaccepted
+        UNION ALL
+        SELECT accepter_id AS id
+        FROM requestaccepted
+    ) t
+    GROUP BY id
+)
+SELECT top 1 id, MAX(count) AS num
+FROM id_counts group by id
+ORDER BY num DESC 
+;
+
