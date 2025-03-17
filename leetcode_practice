@@ -194,3 +194,20 @@ FROM id_counts group by id
 ORDER BY num DESC 
 ;
 
+-------------------------***********17-3-2025****************-----------------------------
+
+SELECT round(SUM(tiv_2016),2) tiv_2016
+FROM insurance AS outer_table
+WHERE EXISTS (
+    SELECT 1
+    FROM insurance AS inner_table
+    WHERE outer_table.tiv_2015 = inner_table.tiv_2015
+      AND outer_table.pid <> inner_table.pid
+)
+AND NOT EXISTS (
+    SELECT 1
+    FROM insurance AS inner_table
+    WHERE outer_table.lat = inner_table.lat
+      AND outer_table.lon = inner_table.lon
+      AND outer_table.pid <> inner_table.pid
+);
