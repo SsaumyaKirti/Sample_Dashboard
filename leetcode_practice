@@ -211,3 +211,29 @@ AND NOT EXISTS (
       AND outer_table.lon = inner_table.lon
       AND outer_table.pid <> inner_table.pid
 );
+
+---------------------*********19-3-2025*******---------------------------------------
+
+/*select coalesce(salary,null) as SecondHighestSalary from
+(select salary,row_number() 
+over (order by salary desc) as rnm from Employee) t where rnm='2';
+*/
+
+SELECT max(Salary) SecondHighestSalary
+FROM Employee
+WHERE Salary < (SELECT max(Salary) FROM Employee);
+
+--------------------********23-3-2025******-------------------------------
+
+select round(CAST(Count(*) AS FLOAT)/(select CAST(count(distinct customer_id) AS FLOAT) from delivery)*100, 2) as immediate_percentage
+from (
+    select d.customer_id, customer_pref_delivery_date 
+    from delivery d
+    inner join (
+        select min(order_date) order_date, customer_id 
+        from Delivery 
+        group by customer_id
+    ) t on d.customer_id = t.customer_id
+    where d.customer_pref_delivery_date = t.order_date
+) tmp;
+
