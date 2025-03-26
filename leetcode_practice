@@ -1,3 +1,5 @@
+--Note : Leetcode SQL 50 solution. Solutions are not in the sequences. Open for suggestions.
+------------------------------------------------------------------------------------
 with product_id as (
 select product_id from Products where low_fats='Y' and
 recyclable='Y') select * from product_id;
@@ -236,4 +238,89 @@ from (
     ) t on d.customer_id = t.customer_id
     where d.customer_pref_delivery_date = t.order_date
 ) tmp;
+------------------*********** 26-3-2025*****--------------------------------
+--Write a solution to report the fraction of players that logged in again on the day after the day they first logged in, rounded to 2 decimal places.
+WITH FirstLogin AS (
+    SELECT player_id, MIN(event_date) AS first_login_date
+    FROM activity
+    GROUP BY player_id
+),
+NextDayLogin AS (
+    SELECT a.player_id
+    FROM activity a
+    JOIN FirstLogin f
+    ON a.player_id = f.player_id
+    WHERE DATEDIFF(DAY, f.first_login_date, a.event_date) = 1
+)
+SELECT ROUND(
+    CAST((SELECT COUNT(DISTINCT player_id) FROM NextDayLogin) AS FLOAT) /
+    CAST((SELECT COUNT(DISTINCT player_id) FROM activity) AS FLOAT), 2
+) AS fraction;
+---------------------------------------------------------------------------
+--Write a solution to find the daily active user count for a period of 30 days ending 2019-07-27 inclusively. A user was active on someday if they made at least one activity on that day.
 
+select distinct activity_date as day , count(distinct user_id)
+active_users from 
+activity where datediff(day,activity_date,'2019-07-27')<'30'
+and  activity_date  <= '2019-07-27' group by activity_date ;
+---------------------------------------------------------------------------
+--Write a solution to select the product id, year, quantity, and price for the first year of every product sold.
+
+select product_id, year as first_year, quantity, price from 
+sales where (product_id, year) in (
+select product_id, min(year) from sales 
+group by  product_id );
+-----------------------------------------------------------------------------
+--A single number is a number that appeared only once in the MyNumbers table. Find the largest single number. If there is no single number, report null.
+
+select ifnull(max(num),null) num from (select * from Mynumbers
+group by num
+having count(num) = 1)t;
+---------------------------------------------------------------------------
+--For this problem, we will consider a manager an employee who has at least 1 other employee reporting to them.Write a solution to report the ids and the names of all managers, the number of employees who report directly to them, and the average age of the reports rounded to the nearest integer.
+
+with employees_cal as (
+select reports_to,count(reports_to) reports_count,
+Round(SUM(age * 1.0 )/ NULLIF(COUNT(*),0),0) AS average_age
+from employees
+group by reports_to) 
+
+select e.employee_id,e.name,reports_count,average_age
+ from Employees e
+inner join employees_cal ecal on e.employee_id=ecal.reports_to;
+
+-------------------------------------------------------------------------
+--Employees can belong to multiple departments. When the employee joins other departments, they need to decide which department is their primary department. Note that when an employee belongs to only one department, their primary column is 'N'.Write a solution to report all the employees with their primary department. For employees who belong to one department, report their only department.
+
+WITH department_count AS (
+    SELECT 
+        distinct employee_id, 
+        COUNT(department_id) AS department_total
+    FROM 
+        employee
+    GROUP BY 
+        employee_id
+),
+primary_department AS (
+    SELECT 
+        ed.employee_id, 
+        ed.department_id
+    FROM 
+        employee ed
+    JOIN 
+        department_count dc 
+    ON 
+        ed.employee_id = dc.employee_id
+    WHERE 
+        dc.department_total = 1 OR ed.primary_flag = 'Y'
+)
+
+SELECT 
+    distinct e.employee_id, 
+    pd.department_id AS department_id
+FROM 
+    employee e
+LEFT JOIN 
+    primary_department pd 
+ON 
+    e.employee_id = pd.employee_id;
