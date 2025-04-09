@@ -324,3 +324,34 @@ LEFT JOIN
     primary_department pd 
 ON 
     e.employee_id = pd.employee_id;
+
+------------------------------------9-4-2025--------------------
+
+---*****Very important
+
+WITH number_groups AS (
+    SELECT id, visit_date, people,
+           id - ROW_NUMBER() OVER (ORDER BY id) AS group_id
+    FROM Stadium
+    WHERE people >= 100
+)
+SELECT id, visit_date, people
+FROM number_groups
+WHERE group_id IN (
+    SELECT group_id FROM number_groups GROUP BY group_id HAVING COUNT(*) >= 3
+)
+ORDER BY group_id, id;
+
+
+SELECT 
+    t.request_at AS Day,
+    ROUND(
+        1.0 * SUM(CASE WHEN t.status IN ('cancelled_by_driver', 'cancelled_by_client') THEN 1 ELSE 0 END) 
+        / NULLIF(COUNT(DISTINCT CASE WHEN u_client.banned = 'No' AND u_driver.banned = 'No' THEN t.id END),0) * 1.0, 2
+    ) AS "Cancellation Rate"
+FROM Trips t
+JOIN Users u_client ON t.client_id = u_client.users_id AND u_client.banned = 'No'
+JOIN Users u_driver ON t.driver_id = u_driver.users_id AND u_driver.banned = 'No'
+WHERE 
+    request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.request_at;
